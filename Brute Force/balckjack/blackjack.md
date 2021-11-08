@@ -14,3 +14,8 @@
 
 ## 해결방안
 > itertools module을 사용하여 주어진 카드들로 3장의 combination들을 만들어내었다.
+ > |Iterator|Arguments|Results|Example|
+ > |----|----|----|----|  
+ > |`product()`|p, q, … <br/>[repeat=1]|중첩된 for 루프와 동등한 cartesian product|`product('ABCD', repeat=2)`<br/>AA AB AC AD BA BB BC BD CA CB CC CD DA DB DC DD|
+ > |`permutation()`|p[,r]|r-length tuples, 가능한 모든 순서, 반복되는 요소 없음|`permutations('ABCD', 2)`<br/>AB AC AD BA BC BD CA CB CD DA DB DC|
+  > |`combinations()`|p,r|r길이의 조합의 모든 경우의 수|`combinations('ABCD', 2)`<br/>AB AC AD BC BD CD|
