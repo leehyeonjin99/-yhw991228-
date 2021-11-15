@@ -9,3 +9,7 @@
 
 ## 해결방안
 > Merge Sort : O(nlogn)
+
+![image](https://user-images.githubusercontent.com/57162812/141807244-36b46f1b-7f71-4c9f-bac2-f6c30f133e96.png)
+
+> input() 함수를 사용하면 시간초과가 뜬다. 따라서 sys library의 sys.stdin.readline()을 사용하여 해결하였다.
