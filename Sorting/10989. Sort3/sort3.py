@@ -1,12 +1,12 @@
 import sys
 
 N=int(input())
-arr=[0]*10001
+count_arr=[0]*10001
 
 for i in range(N):
-    arr[int(sys.stdin.readline())]+=1
+    count_arr[int(sys.stdin.readline())]+=1
 
-for i in range(len(arr)):
-    while arr[i]:
+for i in range(len(count_arr)):
+    while count_arr[i]:
         print(i)
-        arr[i]-=1
+        count_arr[i]-=1
