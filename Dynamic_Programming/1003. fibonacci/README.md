@@ -2,7 +2,8 @@
 
 ## 문제
 > 다음 소스는 N번째 피보나치 수를 구하는 C++ 함수이다.
-''' C
+
+```C
 int fibonacci(int n) {
     if (n == 0) {
         printf("0");
@@ -14,7 +15,7 @@ int fibonacci(int n) {
         return fibonacci(n‐1) + fibonacci(n‐2);
     }
 }
-'''
+```
 > fibonacci(3)을 호출하면 다음과 같은 일이 일어난다.
    - fibonacci(3)은 fibonacci(2)와 fibonacci(1) (첫 번째 호출)을 호출한다.
    - fibonacci(2)는 fibonacci(1) (두 번째 호출)과 fibonacci(0)을 호출한다.
@@ -33,7 +34,9 @@ int fibonacci(int n) {
 
 ## 해결방안
 > 시간초과 코드
-''' python
+
+
+```python
 def fibonacci(n):
     global count0
     global count1
@@ -58,5 +61,5 @@ for num in L:
     count1=0
     fibonacci(num)
     print(f"{count0} {count1}")
-'''
+```
 > 시간 초과 원인인 반복 횟수를 줄이기 위하여 호출 횟수를 리스트로 만든다.
