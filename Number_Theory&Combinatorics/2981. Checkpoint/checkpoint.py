@@ -7,7 +7,7 @@ for i in range(N):
 L.sort()
 S=[]
 for i in range(N-1):
-    S.append(abs(L[i]-L[i+1]))
+    S.append(L[i+1]-L[i])
 GCD=S[0]
 if N>2:
     for s in S[1:]:
@@ -18,6 +18,7 @@ for i in range(2,int(math.sqrt(GCD)+1)):
         R.append(i)
         if i!=int(GCD//i):
             R.append(int(GCD//i))
+R.sort()
 for i in R:
     print(i, end=' ')
 print(GCD)
