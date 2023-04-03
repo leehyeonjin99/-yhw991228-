@@ -1,34 +1,37 @@
 import sys
 from collections import deque
+input = sys.stdin.readline
 
-N = int(sys.stdin.readline())
-numbers = list(map(int, sys.stdin.readline().split()))
-operator = list(map(int, sys.stdin.readline().split())) # +, -, *, //
-m, M = 1000000000, -1000000000
-que = deque([])
-que.append([0, numbers[0], operator])
+N = int(input())
+nums = list(map(int, input().split()))
+operations = list(map(int, input().split()))
 
+max_ans = -1000000000
+min_ans = 1000000000
+que = deque([[nums[0], 1, operations]])
 while que:
-    num_idx, answer, now_operator = que.popleft()
-    # print(answer, now_operator)
-    if num_idx == N-1:
-        m = min(m, answer)
-        M = max(M, answer)
+    now_ans, now_idx, now_oper = que.popleft()
+    if now_idx == N:
+        max_ans = max(max_ans, now_ans)
+        min_ans = min(min_ans, now_ans)
         continue
-    for idx in range(4):
-        if now_operator[idx] > 0:
-            if idx == 0:
-                next_answer = answer + numbers[num_idx + 1]
-            elif idx == 1:
-                next_answer = answer - numbers[num_idx + 1]
-            elif idx == 2:
-                next_answer = answer * numbers[num_idx + 1]
+    for oper_idx, oper_cnt in enumerate(now_oper):
+        if oper_cnt == 0:
+            continue
+        next_oper = now_oper.copy()
+        next_oper[oper_idx] -= 1
+        if oper_idx == 0:
+            next_ans = now_ans + nums[now_idx]
+        elif oper_idx == 1:
+            next_ans = now_ans - nums[now_idx]
+        elif oper_idx == 2:
+            next_ans = now_ans * nums[now_idx]
+        else:
+            if now_ans >= 0:
+                next_ans = now_ans // nums[now_idx]
             else:
-                next_answer = answer // numbers[num_idx + 1] if answer >=0 else -((-answer) // numbers[num_idx + 1])
-            next_operator = now_operator.copy()
-            next_operator[idx] -= 1
-            que.append([num_idx + 1, next_answer, next_operator])
-            # print(num_idx + 1, numbers[num_idx + 1], next_answer)
+                next_ans = -((-now_ans) // nums[now_idx])
+        que.append([next_ans, now_idx + 1, next_oper])
 
-print(M)
-print(m)
+print(max_ans)
+print(min_ans)

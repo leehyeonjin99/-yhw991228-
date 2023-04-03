@@ -1,42 +1,32 @@
 import sys
+input = sys.stdin.readline
 
-N, M = map(int, sys.stdin.readline().split())
-r, c, d = map(int, sys.stdin.readline().split())
-board = []
+N, M = map(int, input().split())
+now_r, now_c, now_d = map(int, input().split())
+dirs = {0: [-1, 0], 1: [0, 1], 2: [1, 0], 3: [0, -1]}
+room = []
 for _ in range(N):
-    board.append(list(map(int, sys.stdin.readline().split())))
+    room.append(list(map(int, input().split())))
 
-direction = {(-1, 0): 0, (0, 1): 1, (1, 0): 2, (0, -1): 3}
-left_direction = {0: (0, -1), 1: (-1, 0), 2: (0, 1), 3: (1, 0)}
-count = 0
-row, col, dir = r, c, d
-cleaning = [[False for _ in range(M)] for _ in range(N)]
+answer = 0
 while True:
-    # print("=======Now", dir, [row, col])
-    cleaning[row][col] = True
+    if room[now_r][now_c] == 0:
+        room[now_r][now_c] = -1
+        answer += 1
     check = False
-    for _ in range(4):
-        next_dir = left_direction[dir]
-        next_row = row + next_dir[0]
-        next_col = col + next_dir[1]
-        # print("Next", next_dir, [next_row, next_col], end = " ")
-        dir = direction[next_dir]
-        if board[next_row][next_col] == 0 and not cleaning[next_row][next_col]:
+    for cnt in range(4):
+        now_d = (now_d - 1) % 4
+        next_r = now_r + dirs[now_d][0]
+        next_c = now_c + dirs[now_d][1]
+        if room[next_r][next_c] == 0:
+            now_r, now_c = next_r, next_c
             check = True
-            row, col = next_row, next_col
-            # print("치워야함")
             break
-        # print("벽이거나 치워져 있음")
     if not check:
-        # print([row - next_dir[0], col - next_dir[1]], end=" ")
-        if board[row - next_dir[0]][col - next_dir[1]] == 0:
-            row = row - next_dir[0]
-            col = col - next_dir[1]
-            # print("후진")
-        else:
-            # print("후진 불가능,,,종료")
+        next_r = now_r - dirs[now_d][0]
+        next_c = now_c - dirs[now_d][1]
+        if not (0 <= next_r < N and 0 <= next_c < M) or room[next_r][next_c] == 1:
             break
-num = 0     
-for clean in cleaning:
-    num += sum(clean)
-print(num)
+        now_r, now_c = next_r, next_c
+
+print(answer)

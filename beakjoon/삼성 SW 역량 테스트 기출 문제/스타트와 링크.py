@@ -1,24 +1,24 @@
 import sys
+input = sys.stdin.readline
 from itertools import combinations
 
-N = int(sys.stdin.readline())
-ability = []
+N = int(input())
+power = []
 for _ in range(N):
-    tmp = list(map(int, sys.stdin.readline().split()))
-    ability.append(tmp)
-all_members = set(range(N))
+    tmp = list(map(int, input().split()))
+    power.append(tmp)
 
-diff_min = sys.maxsize
-# print(diff_min)
-for team in combinations(range(N), N//2):
-    another_team = all_members - set(team)
-    team_ability = 0
-    another_team_ability = 0
-    for two in combinations(team, 2):
-        team_ability += (ability[two[0]][two[1]] + ability[two[1]][two[0]])
-    for two in combinations(another_team, 2):
-        another_team_ability += (ability[two[0]][two[1]] + ability[two[1]][two[0]])
-    team_diff = abs(team_ability - another_team_ability)
-    diff_min = min(diff_min, team_diff)
+answer = sys.maxsize
+team = set(range(N))
+for team1 in combinations(team, N //2):
+    team1_power = 0
+    for (p1, p2) in combinations(team1, 2):
+        team1_power += (power[p1][p2] + power[p2][p1])
+    team2 = team - set(team1)
+    team2_power = 0
+    for (p1, p2) in combinations(team2, 2):
+        team2_power += (power[p1][p2] + power[p2][p1])
+    diff = abs(team1_power - team2_power)
+    answer = min(answer, diff)
 
-print(diff_min)    
+print(answer)

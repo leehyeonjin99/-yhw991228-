@@ -1,51 +1,56 @@
 import sys
+input = sys.stdin.readline
 from itertools import combinations
+from collections import deque
 
-N, M = map(int, sys.stdin.readline().split())
+N, M = map(int, input().split())
 board = []
-viruses = []
-new_wall = []
+virus = []
+nothing = []
+total = 0
 for row in range(N):
-    R = list(map(int, sys.stdin.readline().split()))
-    board.append(R)
+    tmp = list(map(int, input().split()))
+    board.append(tmp)
     for col in range(M):
-        if R[col] == 2:
-            viruses.append([row, col])
-        elif R[col] == 0:
-            new_wall.append([row, col])
+        if tmp[col] == 0:
+            nothing.append([row, col])
+            total += 1
+        elif tmp[col] == 2:
+            virus.append([row, col])
 
-def virus_spread(loc):
-    direction = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-    for dir in direction:
-        next_row = loc[0] + dir[0]
-        next_col = loc[1] + dir[1]
-        # print(next_col, next_row)
-        if 0 <= next_row < N and 0 <= next_col < M and new_board[next_row][next_col] == 0:
-            new_board[next_row][next_col] = 2
-            virus_spread([next_row, next_col])
-
-def calc_safety(board):
-    safety_count = 0
-    for row in range(N):
-        for col in range(M):
-            if board[row][col] == 0:
-                safety_count += 1
-    return safety_count
-
+drows = [1, -1, 0, 0]
+dcols = [0, 0, 1, -1]
 answer = 0
-# f = open("result.txt", 'w')
-for new_wall_locs in combinations(new_wall, 3):
-    new_board = [b.copy() for b in board]
-    for new_wall_loc in new_wall_locs:
-        new_board[new_wall_loc[0]][new_wall_loc[1]] = 1
-    # f.write("======================Before")
-    # for n_b in new_board:
-    #     f.write(f"{n_b}\n")
-    for virus in viruses:
-        virus_spread(virus)
-    # f.write("======================After")
-    # for n_b in new_board:
-    #     f.write(f"{n_b}\n")
-    answer = max(answer, calc_safety(new_board))
-# f.close()
+for (r1, c1), (r2, c2), (r3, c3) in combinations(nothing, 3):
+    
+    board[r1][c1] = 1
+    board[r2][c2] = 1
+    board[r3][c3] = 1
+
+    max_answer = total - 3
+    visited = set([])
+    que = deque([])
+    for (v1, v2) in virus:
+        que.append([v1, v2])
+        visited.add((v1, v2))
+    while que:
+        now_row, now_col = que.popleft()
+        for (drow, dcol) in zip(drows, dcols):
+            next_row = now_row + drow
+            next_col = now_col + dcol
+            if not (0 <= next_row < N and 0 <= next_col < M):
+                continue
+            if board[next_row][next_col] == 1:
+                continue
+            if (next_row, next_col) in visited:
+                continue
+            que.append([next_row, next_col])
+            visited.add((next_row, next_col))
+            max_answer -= 1
+    answer = max(answer, max_answer)
+    
+    board[r1][c1] = 0
+    board[r2][c2] = 0
+    board[r3][c3] = 0
+
 print(answer)
