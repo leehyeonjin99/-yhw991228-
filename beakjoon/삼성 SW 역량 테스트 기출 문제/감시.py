@@ -1,94 +1,62 @@
-from collections import deque
 import sys
+from collections import deque
+from copy import deepcopy
+input = sys.stdin.readline
 
-N, M = map(int, sys.stdin.readline().split())
-cctv_circle = [[0 for _ in range(M)] for _ in range(N)]
-office = []
-cctv = []
-
+N, M = map(int, input().split())
+board = []
+cctvs = []
+cctv_cnt = 0
+total_size = 0
 for row in range(N):
-    new_row = list(map(int, sys.stdin.readline().split()))
-    office.append(new_row)
+    tmp = list(map(int, input().split()))
+    board.append(tmp)
     for col in range(M):
-        if new_row[col] not in [0, 6]:
-            cctv.append([row, col, office[row][col]])
-        if new_row[col] > 0:
-            cctv_circle[row][col] = 1
-
-dir = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-def cctv_check(cctv_circle, cctv_row, cctv_col, direction):
-    cctv_circle_tmp = [row.copy() for row in cctv_circle]
-    cctv_row, cctv_col = cctv_row + direction[0], cctv_col + direction[1]
-    while 0 <= cctv_row < N and 0 <= cctv_col < M and office[cctv_row][cctv_col] != 6:
-        cctv_circle_tmp[cctv_row][cctv_col] = 1
-        cctv_row, cctv_col = cctv_row + direction[0], cctv_col + direction[1]
-    return cctv_circle_tmp
-
-def cctv_circle_num(cctv_circle):
-    count = 0
-    for row in range(N):
-        for col in range(M):
-            if cctv_circle[row][col] == 0:
-                count += 1
-    return count
-
-def que_append_check(next_cctv_circle, use_cctv):
-    global answer
-    if use_cctv < len(cctv):
-        que.append([next_cctv_circle, cctv[use_cctv], use_cctv])
-    else:
-        answer = min(answer, cctv_circle_num(next_cctv_circle))
-
-def show_circle(cctv_circle):
-    print("="*10)
-    for cctv_cir in cctv_circle:
-        print(*cctv_cir)
-
-if len(cctv) == 0:
-    print(cctv_circle_num(cctv_circle))
-else:
-    que = deque([])
-    que.append([cctv_circle, cctv[0], 0])
-    answer = 64
-
-    while que:
-        now_cctv_circle, (cctv_loc_row, cctv_loc_col, cctv_num), use_cctv = que.popleft()
-        use_cctv += 1
-        if cctv_num == 1:
-            for now_dir in dir:
-                next_cctv_circle = cctv_check(now_cctv_circle, cctv_loc_row, cctv_loc_col, now_dir)
-                que_append_check(next_cctv_circle, use_cctv)
-                # show_circle(next_cctv_circle)
-        elif cctv_num == 2:
-            for idx in range(2):
-                next_cctv_circle = cctv_check(now_cctv_circle, cctv_loc_row, cctv_loc_col, dir[idx])
-                next_cctv_circle = cctv_check(next_cctv_circle, cctv_loc_row, cctv_loc_col, dir[idx+2])
-                que_append_check(next_cctv_circle, use_cctv)
-                # show_circle(next_cctv_circle)
-        elif cctv_num == 3:
-            for idx in range(4):
-                first_dir = dir[idx]
-                second_dir = dir[idx + 1 if idx < 3 else 0]
-                next_cctv_circle = [row.copy() for row in now_cctv_circle]
-                for now_dir in [first_dir, second_dir]:
-                    next_cctv_circle = cctv_check(next_cctv_circle, cctv_loc_row, cctv_loc_col, now_dir)
-                que_append_check(next_cctv_circle, use_cctv)
-                # show_circle(next_cctv_circle)
-        elif cctv_num == 4:
-            for not_dir in dir:
-                now_dirs = [d for d in dir if d!=not_dir]
-                next_cctv_circle = [row.copy() for row in now_cctv_circle]
-                for now_dir in now_dirs:
-                    next_cctv_circle = cctv_check(next_cctv_circle, cctv_loc_row, cctv_loc_col, now_dir)
-                que_append_check(next_cctv_circle, use_cctv)
-                # show_circle(next_cctv_circle)
-        elif cctv_num == 5:
-            next_cctv_circle = [row.copy() for row in now_cctv_circle]
-            for now_dir in dir:
-                next_cctv_circle = cctv_check(next_cctv_circle, cctv_loc_row, cctv_loc_col, now_dir)
-            que_append_check(next_cctv_circle, use_cctv)
-            # show_circle(next_cctv_circle)
-
-    print(answer)
+        if tmp[col] == 0:
+            total_size += 1
+        elif 1 <= tmp[col] <= 5:
+            cctvs.append([tmp[col], [row, col]])
+            cctv_cnt += 1
+def check(cctv_row, cctv_col, dir_list):
+    dirs = {1 : [1, 0], 2: [0, 1], 3: [-1, 0], 4: [0, -1]}
+    can_see = set([])
+    for dir in dir_list:
+        (drow, dcol) = dirs[dir]
+        next_row, next_col = cctv_row + drow, cctv_col + dcol
+        while 0 <= next_row < N and 0 <= next_col < M:
+            if board[next_row][next_col] == 6:
+                break
+            elif board[next_row][next_col] == 0:
+                can_see.add((next_row, next_col))
+            next_row += drow
+            next_col +=  dcol
+    return can_see
 
 
+answer = N * M
+que = deque([[0, set([])]])
+while que:
+    cctv_idx, can_see = que.popleft()
+    # print(cctv_idx, can_see)
+    if cctv_idx == cctv_cnt:
+        # print("END")
+        # print(total_size - len(can_see), can_see)
+        answer = min(answer, total_size - len(can_see))
+        continue
+    cctv_num, (cctv_row, cctv_col) = cctvs[cctv_idx]
+    if cctv_num == 1:
+        for dirs in [[1], [2], [3], [4]]:
+            que.append([cctv_idx + 1, can_see | check(cctv_row, cctv_col, dirs)])
+    elif cctv_num == 2:
+        for dirs in [[1, 3], [2, 4]]:
+            que.append([cctv_idx + 1, can_see | check(cctv_row, cctv_col, dirs)])
+    elif cctv_num == 3:
+        for dirs in [[1, 2], [2, 3], [3, 4], [4, 1]]:
+            que.append([cctv_idx + 1, can_see | check(cctv_row, cctv_col, dirs)])
+    elif cctv_num == 4:
+        for dirs in [[1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]]:
+            que.append([cctv_idx + 1, can_see | check(cctv_row, cctv_col, dirs)])
+    elif cctv_num == 5:
+        que.append([cctv_idx + 1, can_see | check(cctv_row, cctv_col, [1, 2, 3, 4])])
+
+print(answer)
