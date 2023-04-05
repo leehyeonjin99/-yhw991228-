@@ -1,58 +1,44 @@
 import sys
 from collections import deque
-
-sys.setrecursionlimit(10**5)
-nation = []
-N, L, R = map(int, sys.stdin.readline().split())
+input = sys.stdin.readline
+N, L, R = map(int, input().split())
+board = []
 for _ in range(N):
-    nation.append(list(map(int, sys.stdin.readline().split())))
+    board.append(list(map(int, input().split())))
 
+def solution(row, col):
+    pos, sum, cnt = [[row, col]], board[row][col], 1
+    que = deque([[row, col]])
+    visited[row][col] = 1
+    while que:
+        now_row, now_col = que.popleft()
+        for (drow, dcol) in zip(drows, dcols):
+            next_row, next_col = now_row + drow, now_col + dcol
+            if 0 <= next_row < N  and 0 <= next_col < N and visited[next_row][next_col] == 0 and L <= abs(board[now_row][now_col] - board[next_row][next_col]) <= R:
+                visited[next_row][next_col] = 1
+                cnt += 1
+                sum += board[next_row][next_col]
+                pos.append([next_row, next_col])
+                que.append([next_row, next_col])
+    next_pop = sum // cnt
+    if cnt > 1:
+        for (row, col) in pos:
+            board[row][col] = next_pop
+
+drows = [1, -1, 0, 0]
+dcols = [0, 0, 1, -1]
 day = 0
-dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]]
 while True:
-    # print(f"Day {day}")
     visited = [[0 for _ in range(N)] for _ in range(N)]
-    union_count = 0
-    for not_visit_row in range(N):
-        for not_visit_col in range(N):
-            if visited[not_visit_row][not_visit_col] == 0:
-                visited[not_visit_row][not_visit_col] = 1
-                need_explore = False
-                # 시간 초과 방지를 위해 주변 탐색이 필요한지 확인
-                for dir in dirs:
-                        next_row = not_visit_row + dir[0]
-                        next_col = not_visit_col + dir[1]
-                        if 0 <= next_row < N and 0 <= next_col < N and L <= abs(nation[not_visit_row][not_visit_col] - nation[next_row][next_col]) <= R:
-                            need_explore = True
-                if need_explore:
-                    que = deque([[not_visit_row, not_visit_col]])
-                    union = []
-                    union_sum = 0
-                    union_cnt = 0
-                    while que:
-                        now_row, now_col = que.popleft()
-                        now_population = nation[now_row][now_col]
-                        union_sum += now_population
-                        union_cnt += 1
-                        for dir in dirs:
-                            next_row = now_row + dir[0]
-                            next_col = now_col + dir[1]
-                            if 0 <= next_row < N and 0 <= next_col < N:
-                                next_popluation = nation[next_row][next_col]
-                                if not visited[next_row][next_col] and L <= abs(now_population - next_popluation) <= R:
-                                    # print("Next :", [next_row, next_col])
-                                    que.append([next_row, next_col])
-                                    union.append([next_row, next_col])
-                                    visited[next_row][next_col] = 1
-                    if union:
-                        union.append([not_visit_row, not_visit_col])
-                        for (nation_row, nation_col) in union:
-                            nation[nation_row][nation_col] = union_sum // union_cnt
-                        union_count += 1
-    # print("Village!!!!!")
-    # for n in nation:
-    #     print(*n)
-    if union_count == 0:
+    city_idx = 0
+    for row in range(N):
+        for col in range(N):
+            if visited[row][col] > 0:
+                continue
+            solution(row, col)
+            city_idx += 1
+    if city_idx == N * N:
         break
     day += 1
+    
 print(day)

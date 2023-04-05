@@ -1,37 +1,26 @@
 import sys
-
-N = int(sys.stdin.readline())
+input = sys.stdin.readline
+N = int(input())
 board = [[0 for _ in range(101)] for _ in range(101)]
-dirs = {0: [0, 1],
-        1: [-1, 0],
-        2: [0, -1],
-        3: [1, 0]}
-
-def rotation(origin, points):
-    rot_points = []
-    for point in points[::-1][1:]:
-        drow, dcol = point[0] - origin[0],  point[1] - origin[1]
-        rot_point_row = origin[0] + dcol
-        rot_point_col = origin[1] - drow
-        rot_points.append([rot_point_row, rot_point_col])
-    return rot_points
-
+dirs = {0 : [1, 0], 1: [0, -1], 2: [-1, 0], 3: [0, 1]}
 for _ in range(N):
-    # print("="*20)
-    col, row, dir, gen = map(int, sys.stdin.readline().split())
-    gen0 = [row + dirs[dir][0], col + dirs[dir][1]]
-    points = [[row, col], gen0]
-    # print(f"GEN0", points)
-    for g in range(gen):
-        points = points + rotation(points[-1], points)
-        # print(f"GEN{g + 1}", points)
-    for point in points:
-        board[point[0]][point[1]] = 1
+    x, y, d, g = map(int, input().split())
+    board[x][y] = 1
+    (dx, dy) = dirs[d]
+    board[x + dx][y + dy] = 1
+    dragon_curve = [[x, y], [x + dx, y + dy]]
+    for generation in range(g):
+        (last_x, last_y) = dragon_curve[-1]
+        for (x, y) in dragon_curve[-2::-1]:
+            dx, dy = last_x - x, last_y - y
+            next_x, next_y = last_x + dy, last_y - dx
+            dragon_curve.append([next_x, next_y])
+            board[next_x][next_y] = 1
 
 answer = 0
 for row in range(100):
     for col in range(100):
-        if sum(board[row][col: col+2]) + sum(board[row + 1][col: col+2]) == 4:
+        if board[row][col] and board[row + 1][col] and board[row][col + 1] and board[row + 1][col + 1]:
             answer += 1
 
 print(answer)
