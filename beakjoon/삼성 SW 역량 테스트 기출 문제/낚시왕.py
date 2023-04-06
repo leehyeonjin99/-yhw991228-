@@ -1,50 +1,52 @@
 import sys
-R, C, M = map(int, sys.stdin.readline().split())
-sharks = {}
-fishing = [[[] for _ in range(C)] for _ in range(R)]
+from copy import deepcopy
+input = sys.stdin.readline
+R, C, M = map(int, input().split())
+sharks_locs = set([])
+board = [[[] for _ in range(C)] for _ in range(R)]
+for _ in range(M):
+    r, c, s, d, z = map(int, input().split())  # 속력, 방향, 크기
+    r, c = r - 1, c - 1
+    board[r][c] = [s, d, z]
+    sharks_locs.add((r, c))
+
 dirs = {1: [-1, 0], 2: [1, 0], 3: [0, 1], 4: [0, -1]}
-for idx in range(M):
-    r, c, s, d, z = map(int, sys.stdin.readline().split())
-    sharks[idx] = [[r - 1, c - 1], s, dirs[d], z]
-    fishing[r - 1][c - 1].append(idx)
+
+def fishing():
+    global answer, board, sharks_locs
+    for row in range(R):
+        if board[row][col]:
+            answer += board[row][col][2]
+            board[row][col] = []
+            sharks_locs.remove((row, col))
+            break
+
+def moving():
+    global sharks_locs, board
+    new_board = [[[] for _ in range(C)] for _ in range(R)]
+    new_sharks_locs = set([])
+    for (row, col) in sharks_locs:
+        (v, d, s) = board[row][col]
+        board[row][col] = []
+        now_row, now_col = row, col
+        (drow, dcol) = dirs[d]
+        for move in range(v):
+            next_row, next_col = now_row + drow, now_col + dcol
+            if not (0 <= next_row < R and 0 <= next_col < C):
+                drow, dcol = -drow, -dcol
+                d = d - 1 if d % 2 == 0 else d + 1
+                next_row, next_col = now_row + drow, now_col + dcol
+            now_row, now_col = next_row, next_col
+        if new_board[now_row][now_col] and new_board[now_row][now_col][-1] > s:
+            continue
+        new_board[now_row][now_col] = [v, d, s]
+        new_sharks_locs.add((now_row, now_col))
+    board = new_board
+    sharks_locs = new_sharks_locs
 
 answer = 0
-for fisher_col in range(C):
-    # print("=="*10)
-    for row in range(R):
-        if fishing[row][fisher_col]:
-            answer += sharks[fishing[row][fisher_col][0]][-1]
-            # print(f"Fisher Catch shark", (fishing[row][fisher_col][0], sharks[fishing[row][fisher_col][0]][-1]))
-            del sharks[fishing[row][fisher_col][0]]
-            fishing[row][fisher_col].pop()    
-            break
-    fishing = [[[] for _ in range(C)] for _ in range(R)]
-    remove_shark_idxs = []
-    for shark in sharks:
-        # print(shark, "Shark moving")
-        (shark_row, shark_col), shark_speed, (shark_drow, shark_dcol), shark_size = sharks[shark]
-        for _ in range(shark_speed):
-            if not (0 <= shark_row + shark_drow < R and 0 <= shark_col + shark_dcol < C):
-                shark_drow = -shark_drow
-                shark_dcol = -shark_dcol
-            # print((shark_row, shark_col), end = " => ")
-            shark_row += shark_drow
-            shark_col += shark_dcol
-            # print((shark_row, shark_col))
-        sharks[shark][0] = [shark_row, shark_col]
-        sharks[shark][2] = [shark_drow, shark_dcol]
-        if fishing[shark_row][shark_col]:
-            current_shark_idx = fishing[shark_row][shark_col][0]
-            current_shark_size = sharks[current_shark_idx][-1]
-            if current_shark_size < shark_size:
-                remove_shark_idxs.append(current_shark_idx)
-                fishing[shark_row][shark_col].pop()
-                fishing[shark_row][shark_col].append(shark)
-            else:
-                remove_shark_idxs.append(shark)
-        else:
-            fishing[shark_row][shark_col].append(shark)
+for col in range(C):
+    fishing()
+    moving()
 
-    for idx in remove_shark_idxs:
-        del sharks[idx]
 print(answer)

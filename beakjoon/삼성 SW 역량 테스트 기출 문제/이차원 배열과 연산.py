@@ -2,42 +2,43 @@ import sys
 from collections import Counter
 
 r, c, k = map(int, sys.stdin.readline().split())
-r, c = r-1, c-1
+r, c = r - 1, c - 1
 board = []
 for _ in range(3):
     board.append(list(map(int, sys.stdin.readline().split())))
 
-def count_sort():
-    max_row_size = 0
-    for row in range(len(board)):
-        num_count = dict(Counter(board[row])).items()
-        num_count = sorted(num_count, key = lambda item: (item[1], item[0]))
-        row_tmp = [item for items in num_count if items[0] for item in items]
-        max_row_size = max(max_row_size, len(row_tmp))
-        board[row] = row_tmp
-    for row in range(len(board)):
-        if len(board[row]) < max_row_size:
-            for _ in range(max_row_size - len(board[row])):
-                board[row].append(0)
+def row_oper():
+    max_length = 0
+    new_board = []
+    for row in board:
+        new_row = []
+        count = sorted(dict(Counter(row)).items(), key = lambda x : (x[1], x[0]))
+        for (value, cnt) in count:
+            if value == 0:
+                continue
+            new_row += [value, cnt]
+        max_length = max(max_length, len(new_row))
+        new_board.append(new_row)
+    for row in range(len(new_board)):
+        if len(new_board[row]) == max_length:
+            continue
+        else:
+            new_board[row] += [0 for _ in range(max_length - len(new_board[row]))]
+    return new_board
 
-want = False
-for time in range(100):
-    if r < len(board) and c < len(board[0]) and board[r][c] == k:
-        want = True
-        break
-    # 행의 크기가 더 큰 경우 => 행 연산 실행
-    if len(board[0]) <= len(board):
-        count_sort()
-    else:
-        board = list(zip(*board))
-        count_sort()
-        for _ in range(3):
-            board = list(zip(*board))
+def solution():
+    global board
+    day = 0
+    while day <= 100:
+        if len(board) > r and len(board[0]) > c and board[r][c] == k:
+            return day
+        if len(board) >= len(board[0]):
+            board = row_oper()
+        else:
+            board = [list(tmp) for tmp in zip(*board)]
+            board = row_oper()
+            board = [list(tmp) for tmp in zip(*board)]
+        day += 1
+    return -1
 
-if want:
-    print(time)
-else:
-    if r < len(board) and c < len(board[0]) and board[r][c] == k:
-        print(100)
-    else:
-        print(-1)
+print(solution())
